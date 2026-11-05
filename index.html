@@ -1,0 +1,283 @@
+<!doctype html>
+<html lang="zh-Hant">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>智能客服｜社宅管考系統</title>
+  <style>
+    :root{--bg:#f7f7f7;--brown:#9b6b42;--muted:#b9a99d;--ink:#193c58;--teal:#3bbbc2;--line:#ded5ce}
+    *{box-sizing:border-box}
+    body{margin:0;background:var(--bg);color:var(--ink);font-family:"Microsoft JhengHei","PingFang TC",sans-serif;font-size:16px}
+    button,textarea{font:inherit}button{cursor:pointer}button:focus-visible,a:focus-visible{outline:3px solid #238e96;outline-offset:4px}
+    .app{height:100dvh;min-height:520px;display:flex;flex-direction:column;padding:25px 24px 14px}
+    .header{display:flex;align-items:center;justify-content:space-between;gap:20px;min-height:50px;border-bottom:3px solid var(--teal);position:relative;padding-bottom:15px;flex-shrink:0}
+    .header:after{content:"";position:absolute;bottom:-3px;left:0;width:20%;height:3px;background:#ffce85}
+    .brand{display:flex;align-items:center;gap:10px;color:var(--brown)}
+    .brand svg{width:31px;height:31px;flex-shrink:0}
+    h1{font-size:25px;letter-spacing:1px;margin:0;white-space:nowrap}
+    .tagline{font-size:17px;margin-left:1px}
+    .breadcrumb{display:flex;align-items:center;gap:15px;color:#c0aa98;font-size:16px;white-space:nowrap;align-self:flex-end}
+    .breadcrumb .current{color:#009afa}.divider{color:#d0c6be}
+    main{display:flex;flex-direction:column;min-height:0;flex:1;padding:29px 17px 0}
+    .welcome{margin:0 0 23px;font-size:18px;line-height:1.7}
+    .tabs{display:flex;gap:0;width:max-content;border:1px solid #cdbbb0;border-radius:7px;padding:4px;background:#fff;max-width:100%}
+    .tab{border:0;background:transparent;color:#887568;padding:10px 30px;border-radius:4px;display:flex;align-items:center;gap:9px;min-height:43px}
+    .tab svg{width:18px;height:18px}.tab[aria-selected="true"]{background:var(--brown);color:#fff;font-weight:700}
+    .topics-area{padding-top:21px;padding-bottom:15px;flex-shrink:0}
+    .topics-label{font-size:14px;color:#80766e;margin:0 0 11px}
+    .topics{display:flex;gap:10px;flex-wrap:wrap}
+    .topic{border:1px solid #d8cbc1;border-radius:5px;background:#fff;color:#8e674a;padding:9px 18px;transition:background .15s,border-color .15s}
+    .topic:hover{background:#f6ede5;border-color:#ad8668}
+    .chat{flex:1;min-height:40px;overflow-y:auto;padding:15px 0 20px;scroll-behavior:smooth}
+    .message{width:fit-content;max-width:80%;line-height:1.75;padding:10px 16px;border:1px solid #dfd5cc;border-radius:9px;margin:0 0 13px;white-space:pre-wrap;overflow-wrap:anywhere;background:white}
+    .message.user{margin-left:auto;background:#f0e7df;border-color:#e7d8cb}.message.notice{color:#756b63;font-size:14px}
+    .message.assistant{white-space:normal;min-width:min(460px,90%)}
+    .answer-text{white-space:pre-wrap;margin:0}
+    .faq-list{display:grid;gap:8px;margin-top:12px}
+    .faq-question{text-align:left;line-height:1.6;border:1px solid #e0d5cc;border-radius:5px;padding:9px 13px;background:#fff;color:var(--ink)}
+    .faq-question:hover{background:#f6ede5;border-color:#ad8668}
+    .demo-label{display:block;color:#8c7868;font-size:12px;margin-bottom:7px}
+    .answer-meta{border-top:1px solid #e9e1da;margin-top:14px;padding-top:9px;color:#81766d;font-size:12px;line-height:1.8}
+    .answer-meta span,.answer-meta time{display:block}
+    .routing-notice{margin-top:14px;padding:10px 14px;border:1px solid #c4dedf;border-radius:6px;background:#edf6f6;color:#28656a;font-size:14px;line-height:1.7}
+    .composer{position:relative;flex-shrink:0;border:1px solid #bbaea5;border-radius:18px;background:#fff;height:147px;overflow:hidden}
+    .composer:focus-within{border-color:#a87956;box-shadow:0 0 0 2px #9b6b4210}
+    textarea{border:0;background:transparent;resize:none;color:var(--ink);width:100%;height:100%;padding:15px 55px 38px 18px;line-height:1.65;outline:none;font-size:18px}
+    textarea::placeholder{color:#bcbfc2;opacity:1}
+    .send{position:absolute;right:17px;bottom:13px;display:grid;place-items:center;background:transparent;border:0;color:#9b8f86;border-radius:5px;width:37px;height:37px}.send:hover{background:#f6ede5;color:var(--brown)}.send svg{width:24px;height:24px}
+    @media(max-width:760px){.app{padding:17px 16px 12px}.header{align-items:flex-start}.tagline{display:none}.breadcrumb{font-size:12px;gap:7px}h1{font-size:21px}main{padding:23px 0 0}.welcome{font-size:16px;margin-bottom:18px}.tab{padding:10px 22px}.topic{font-size:14px;padding:8px 13px}.topics{gap:8px}.composer{height:125px}textarea{font-size:16px}.message{max-width:92%}}
+    @media(max-width:450px){.breadcrumb{display:none}.app{min-height:500px}.topics-area{padding-top:17px}.topics-label{font-size:13px}}
+  </style>
+</head>
+<body>
+  <div class="app">
+    <header class="header">
+      <div class="brand">
+        <svg viewBox="0 0 32 32" aria-hidden="true"><path fill="#d1bfb1" d="M2 2h17a4 4 0 0 1 4 4v9a4 4 0 0 1-4 4H9l-5 4v-5a4 4 0 0 1-3-4V6a4 4 0 0 1 1-4Z"/><path fill="#9b6b42" d="M25 10h2a4 4 0 0 1 4 4v9a4 4 0 0 1-4 4v4l-6-4h-6a4 4 0 0 1-4-4v-2h8a6 6 0 0 0 6-6Z"/></svg>
+        <h1>智能客服</h1><span class="tagline">隨時為您解答社宅管理相關問題</span>
+      </div>
+      <nav class="breadcrumb" aria-label="目前位置"><span>⌂ HOME</span><span class="divider">/</span><span>智能客服</span><span class="divider">/</span><span class="current">智能客服</span></nav>
+    </header>
+    <main>
+      <p class="welcome">您好！我是社宅管考系統的AI智能助手，有什麼可以幫助您的嗎？</p>
+      <div class="tabs" role="tablist" aria-label="服務模式">
+        <button class="tab" id="tab-info" type="button" role="tab" aria-selected="true" aria-controls="service-panel" data-mode="info">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" aria-hidden="true"><circle cx="10" cy="10" r="6.5"/><path d="m15 15 6 6"/></svg>資訊查詢
+        </button>
+        <button class="tab" id="tab-guide" type="button" role="tab" aria-selected="false" aria-controls="service-panel" tabindex="-1" data-mode="guide">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" aria-hidden="true"><path d="M12 5C8 2 4 3 2 4v15c3-1 6-1 10 1 4-2 7-2 10-1V4c-2-1-6-2-10 1Zm0 0v15"/></svg>操作指引
+        </button>
+      </div>
+      <div class="routing-notice" id="routing-notice" role="status" aria-live="polite" hidden></div>
+      <section id="service-panel" role="tabpanel" aria-labelledby="tab-info" style="display:flex;flex-direction:column;min-height:0;flex:1">
+        <div class="topics-area"><p class="topics-label" id="topics-label">您想了解哪一類社宅資訊？</p><div class="topics" id="topics" aria-labelledby="topics-label"></div></div>
+        <div class="chat" id="chat" role="log" aria-label="資訊查詢對話" aria-live="polite"></div>
+        <form class="composer" id="composer">
+          <textarea id="question" aria-label="資訊查詢問題" placeholder="請輸入欲查詢的社宅相關問題。"></textarea>
+          <button class="send" type="submit" aria-label="送出問題" title="送出問題"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12h14m-6-6 6 6-6 6"/></svg></button>
+        </form>
+      </section>
+    </main>
+  </div>
+  <script>
+    const config = {
+      info: {name:'資訊查詢', label:'您想了解哪一類社宅資訊？', placeholder:'請輸入欲查詢的社宅相關問題。', topics:['社宅基本資訊','興辦進度','房型規劃','補助計畫','入住情形']},
+      guide:{name:'操作指引', label:'您需要哪一類功能的操作指引？', placeholder:'請描述您要操作的功能。', topics:['土地盤點','興辦計畫','補助計畫','報表產製','圖台']}
+    };
+    // 示範內容；正式環境應由各模式服務提供問題排行、回答及來源更新時間。
+    const faqs = {
+      info:{
+        '社宅基本資訊':[
+          ['目前全國社宅既有及新完工社宅數量','既有社宅：18,000 戶（不含本期新完工）。\n本期新完工社宅：3,500 戶。\n合計：21,500 戶。\n統計單位為戶數；本期起訖與基準日待正式資料提供。'],
+          ['各縣市已完工社宅戶數統計','臺北市：6,000 戶。\n新北市：5,000 戶。\n桃園市：4,000 戶。\n其他縣市合計：6,500 戶。\n全國合計：21,500 戶。'],
+          ['目前全國社宅共有多少處基地？','全國合計：86 處基地。\n臺北市：24 處；新北市：20 處；桃園市：16 處；其他縣市：26 處。\n本項統計基地處數，與住宅戶數分別計算。'],
+          ['臺北市已完工社宅清單與戶數','示範社宅 A：2,000 戶。\n示範社宅 B：1,800 戶。\n示範社宅 C：2,200 戶。\n合計：6,000 戶。\n社宅名稱及數字均為虛構，僅展示清單呈現方式。']
+        ],
+        '興辦進度':[
+          ['114年新完工社宅數量','114 年新完工社宅：3,500 戶。\n臺北市：1,000 戶；新北市：800 戶；桃園市：700 戶；其他縣市：1,000 戶。\n統計範圍為該年度新完工戶數，不含往年已完工戶數。'],
+          ['115年全國規劃中社宅數量','115 年全國規劃中社宅：6,000 戶。\n臺北市：1,500 戶；新北市：2,000 戶；桃園市：1,000 戶；其他縣市：1,500 戶。\n統計範圍僅含規劃中案件，不含施工中及已完工案件。'],
+          ['目前全國施工中社宅數量','全國施工中社宅：8,000 戶。\n臺北市：2,000 戶；新北市：2,500 戶；桃園市：1,500 戶；其他縣市：2,000 戶。'],
+          ['115年預計完工社宅數量與縣市分布','115 年預計完工社宅：4,000 戶。\n臺北市：1,000 戶；新北市：1,200 戶；桃園市：800 戶；其他縣市：1,000 戶。\n本項為預計數，不代表已實際完工，亦不可直接與施工中戶數加總。']
+        ],
+        '房型規劃':[
+          ['115年規劃中社宅各房型戶數與占比','一房型：3,000 戶，占 50%。\n二房型：2,100 戶，占 35%。\n三房型：900 戶，占 15%。\n合計：6,000 戶，占比的分母為本年度規劃中總戶數。'],
+          ['115年新北市規劃中社宅各房型戶數','一房型：1,000 戶。\n二房型：700 戶。\n三房型：300 戶。\n合計：2,000 戶。'],
+          ['115年規劃中無障礙住宅共有幾戶？','無障礙住宅：300 戶，占規劃中總戶數 6,000 戶的 5%。\n無障礙住宅屬房型的交叉分類，已包含於總戶數，不應重複加總。'],
+          ['115年規劃中社宅一房型與二房型合計戶數','一房型：3,000 戶；二房型：2,100 戶。\n合計：5,100 戶，占規劃中總戶數 6,000 戶的 85%。']
+        ],
+        '補助計畫':[
+          ['115年社宅補助計畫核定件數與總金額','核定計畫：12 件。\n核定補助總金額：新臺幣 24 億元。\n本項以核定年度統計，並非實際撥款金額。'],
+          ['115年各縣市核定補助金額統計','臺北市：6 億元。\n新北市：8 億元。\n桃園市：4 億元。\n其他縣市：6 億元。\n合計：新臺幣 24 億元。'],
+          ['115年核定補助計畫累計撥付金額與比率','115 年核定計畫累計已撥付：新臺幣 15 億元。\n核定總額：24 億元。\n撥付比率：62.5%（15 億元 ÷ 24 億元）。\n統計對象為同一批核定計畫。'],
+          ['115年核定補助計畫尚未撥付金額','核定總額 24 億元，扣除累計已撥付 15 億元，尚未撥付金額為新臺幣 9 億元。\n尚未撥付不等同逾期，仍須依各計畫撥款期程判斷。']
+        ],
+        '入住情形':[
+          ['目前全國社宅已入住戶數與入住率','已入住：19,350 戶。\n納入統計的已完工社宅：21,500 戶。\n入住率：90%（19,350 ÷ 21,500）。\n正式統計的分母及基準日應依業務定義確認。'],
+          ['各縣市社宅入住率統計','臺北市：95%（5,700 ÷ 6,000 戶）。\n新北市：90%（4,500 ÷ 5,000 戶）。\n桃園市：85%（3,400 ÷ 4,000 戶）。\n其他縣市合計：約 88.46%（5,750 ÷ 6,500 戶）。'],
+          ['目前全國社宅空戶數量','尚未入住：2,150 戶。\n計算方式：已完工 21,500 戶 − 已入住 19,350 戶。\n尚未入住戶可能包含整修或保留戶，不等同目前可申請戶數。'],
+          ['臺北市社宅已入住與尚未入住戶數','已完工：6,000 戶。\n已入住：5,700 戶。\n尚未入住：300 戶。\n入住率：95%。']
+        ]
+      },
+      guide:{
+        '土地盤點':[
+          ['如何新增土地盤點資料？','1. 開啟土地盤點功能，確認您具有新增權限。\n2. 依實際頁面填寫土地識別資料及必填欄位。\n3. 檢查資料後儲存，確認系統顯示成功訊息。'],
+          ['如何查詢既有的土地盤點資料？','進入土地盤點頁面，依可用欄位輸入地區、地段地號或其他識別條件，執行查詢後開啟對應紀錄。'],
+          ['土地盤點資料儲存失敗怎麼辦？','先檢查必填欄位、欄位格式及畫面上的錯誤提示。若仍失敗，請提供錯誤訊息及操作步驟，以利進一步確認。'],
+          ['如何修改已建置的土地資料？','先查詢並確認目標土地，再檢查資料狀態與編輯權限；可編輯時，修改必要欄位並儲存。']
+        ],
+        '興辦計畫':[
+          ['如何新增興辦計畫？','1. 進入興辦計畫功能，確認新增權限。\n2. 填寫計畫基本資料與必要欄位。\n3. 檢查並儲存；若需送審，請依系統實際流程辦理。'],
+          ['如何更新興辦計畫的進度？','查詢並開啟計畫，確認可編輯後，依實際辦理情形更新進度及相關日期，再儲存確認。'],
+          ['興辦計畫無法送出時如何處理？','確認必填資料、必要附件、案件狀態及送出權限。請依畫面提示修正，仍無法送出時可提供完整錯誤訊息。'],
+          ['如何查詢興辦計畫的審核狀態？','可先以計畫名稱或識別條件查詢，再於清單或明細中查看狀態；實際欄位位置以操作手冊為準。']
+        ],
+        '補助計畫':[
+          ['如何建立補助計畫資料？','1. 開啟補助計畫功能，確認建立權限。\n2. 填寫年度、計畫內容及金額等必要欄位。\n3. 檢查資料與附件後儲存。'],
+          ['如何填報補助款撥付資料？','查詢對應補助計畫後，於可填報的撥款資料區填寫期別、日期及金額，確認與核定內容相符再儲存。'],
+          ['補助計畫金額檢核未通過怎麼辦？','依錯誤訊息檢查金額單位、數值格式、核定額度與各期合計；避免直接修改數字以略過檢核。'],
+          ['如何修正已儲存的補助計畫？','先確認計畫狀態及權限。若已送審或核定，可能需經退回或變更程序；請依正式作業規則辦理。']
+        ],
+        '報表產製':[
+          ['如何產製社宅統計報表？','1. 進入報表產製功能，選擇報表類型。\n2. 設定年度、地區及其他查詢條件。\n3. 檢視結果後，依系統提供的格式匯出。'],
+          ['如何設定報表的年度與縣市條件？','先選擇報表，再設定其提供的年度、縣市等篩選條件；產製後確認報表上的條件與預期一致。'],
+          ['報表沒有資料時如何處理？','檢查條件是否過窄、所選期間是否已有填報資料，以及帳號是否具備查閱權限，再重新查詢。'],
+          ['報表匯出失敗時如何處理？','請保留查詢條件及錯誤訊息，確認是否仍在產製中；若持續失敗，提供報表名稱及操作時間供管理人員確認。']
+        ],
+        '圖台':[
+          ['如何在圖台查找社宅位置？','開啟圖台，使用頁面提供的名稱或地區查詢工具定位，再點選目標圖徵查看資訊。'],
+          ['如何開啟或關閉圖層？','在圖層清單選取所需圖層；若未顯示，請確認圖層是否有比例尺限制或尚在載入。'],
+          ['如何查看圖台上的土地詳細資訊？','開啟對應土地圖層，定位目標後選取圖徵，查看屬性資訊；可見欄位仍依帳號權限及圖層資料而定。'],
+          ['圖台無法顯示或載入很慢怎麼辦？','先確認網路連線並稍候載入，再縮減同時開啟的圖層。若仍異常，請提供瀏覽器、操作時間及錯誤畫面。']
+        ]
+      }
+    };
+    const state = {info:{draft:'',messages:[]},guide:{draft:'',messages:[]}};
+    const question = document.getElementById('question');
+    const chat = document.getElementById('chat');
+    const tabs = [...document.querySelectorAll('[role="tab"]')];
+    let mode = 'info';
+    function renderMessages(){
+      chat.replaceChildren();
+      state[mode].messages.forEach(message=>{
+        const bubble = document.createElement('div');
+        bubble.className = 'message ' + message.type;
+        if(message.type==='assistant'){
+          const demo=document.createElement('span');demo.className='demo-label';demo.textContent=message.items?'熱門問題・示範排序':mode==='info'?'示範回答・數值與名單均為虛構':'示範回答';bubble.append(demo);
+        }
+        const content=document.createElement('p');content.className='answer-text';content.textContent=message.text;bubble.append(content);
+        if(message.items){
+          const list=document.createElement('div');list.className='faq-list';
+          message.items.forEach(entry=>{
+            const button=document.createElement('button');button.type='button';button.className='faq-question';button.textContent=entry[0];
+            button.addEventListener('click',()=>sendAnswer(entry,message.topic));list.append(button);
+          });
+          bubble.append(list);
+        }
+        if(message.chooseMode){
+          const choices=document.createElement('div');choices.className='faq-list';
+          Object.keys(config).forEach(target=>{
+            const button=document.createElement('button');button.type='button';button.className='faq-question';button.textContent=config[target].name;
+            button.addEventListener('click',()=>routeQuestion(message.question,target));choices.append(button);
+          });
+          bubble.append(choices);
+        }
+        if(message.time){
+          const footer=document.createElement('footer');footer.className='answer-meta';
+          const source=document.createElement('span');source.textContent='資料來源：'+message.source;
+          const updated=document.createElement('span');updated.textContent='資料更新時間：待來源提供';
+          const time=document.createElement('time');time.dateTime=message.time;
+          time.textContent='回答時間：'+new Intl.DateTimeFormat('zh-TW',{timeZone:'Asia/Taipei',year:'numeric',month:'2-digit',day:'2-digit',hour:'2-digit',minute:'2-digit',second:'2-digit',hour12:false}).format(new Date(message.time))+'（臺灣時間）';
+          footer.append(source,updated,time);bubble.append(footer);
+        }
+        chat.append(bubble);
+      });
+      chat.scrollTop = chat.scrollHeight;
+    }
+    function sendTopic(topic){
+      state[mode].messages.push({type:'user',text:topic},{type:'assistant',text:'以下是「'+topic+'」的常見問題，請選擇您想了解的內容：',items:faqs[mode][topic],topic});
+      renderMessages();
+    }
+    function sendAnswer(entry,topic){
+      const source=mode==='info'?'社宅管考資料－'+topic:'系統操作手冊－'+topic;
+      state[mode].messages.push({type:'user',text:entry[0]},{type:'assistant',text:entry[1],source:source+'（示範來源，尚未串接）',time:new Date().toISOString()});
+      renderMessages();
+    }
+    function switchMode(next){
+      document.getElementById('routing-notice').hidden=true;
+      state[mode].draft = question.value;
+      mode = next;
+      const current = config[mode];
+      tabs.forEach(tab=>{const selected=tab.dataset.mode===mode;tab.setAttribute('aria-selected',String(selected));tab.tabIndex=selected?0:-1;});
+      document.getElementById('service-panel').setAttribute('aria-labelledby','tab-'+mode);
+      document.getElementById('topics-label').textContent = current.label;
+      question.placeholder = current.placeholder;
+      question.setAttribute('aria-label',current.name+'問題');
+      question.value = state[mode].draft;
+      chat.setAttribute('aria-label',current.name+'對話');
+      const topics = document.getElementById('topics');
+      topics.replaceChildren();
+      current.topics.forEach(topic=>{
+        const button = document.createElement('button');
+        button.type='button';button.className='topic';button.textContent=topic;
+        button.addEventListener('click',()=>sendTopic(topic));
+        topics.append(button);
+      });
+      renderMessages();
+    }
+    tabs.forEach((tab,index)=>{
+      tab.addEventListener('click',()=>switchMode(tab.dataset.mode));
+      tab.addEventListener('keydown',event=>{
+        if(['ArrowLeft','ArrowRight','Home','End'].includes(event.key)){
+          event.preventDefault();const next=event.key==='Home'?0:event.key==='End'?tabs.length-1:(index+1)%tabs.length;
+          switchMode(tabs[next].dataset.mode);tabs[next].focus();
+        }
+      });
+    });
+    function findFAQ(text,target){
+      return Object.entries(faqs[target]).flatMap(([topic,entries])=>entries.map(entry=>({topic,entry}))).find(item=>item.entry[0]===text);
+    }
+    function detectMode(text){
+      // 原型使用明確的常見問題與關鍵詞；共享主題或混合意圖交由使用者選擇。
+      const exact=Object.keys(config).filter(target=>findFAQ(text,target)||config[target].topics.includes(text));
+      if(exact.length===1)return exact[0];
+      if(exact.length>1)return null;
+      const guide=/(操作|操作手冊|使用方式|操作步驟|怎麼用|如何使用|如何操作|無法|失敗|錯誤|必填|權限|儲存|送審|送出|修改|編輯|填報|匯出|退回|補件|圖層|報表產製|土地盤點|(?:如何|怎麼|怎樣|我要|幫我|請).{0,8}新增|新增.{0,8}(?:資料|案件|計畫|紀錄|按鈕|功能))/.test(text);
+      const info=/(基本資訊|興辦進度|房型|入住率|入住情形|入住戶數|已入住|空戶|核定金額|補助金額|撥付|預計完工|新完工|規劃中|施工中|地址|幾戶|多少戶|多少錢|數量|戶數|件數|金額|占比|統計|有哪些社宅|社宅清單)/.test(text);
+      if(guide&&info)return null;
+      return guide?'guide':info?'info':null;
+    }
+    function routeQuestion(text,target){
+      document.getElementById('routing-notice').hidden=true;
+      if(target!==mode){
+        const notice='此問題屬於「'+config[target].name+'」，已自動切換頁籤並帶入問題，您不需要重新輸入。';
+        state[mode].messages.push({type:'notice',text:'您詢問：「'+text+'」\n'+notice});
+        switchMode(target);
+        const banner=document.getElementById('routing-notice');banner.textContent=notice;banner.hidden=false;
+        state[mode].messages.push({type:'notice',text:notice});
+      }
+      const topic=config[mode].topics.find(item=>item===text);
+      const match=findFAQ(text,mode);
+      if(topic){sendTopic(topic);}
+      else if(match){sendAnswer(match.entry,match.topic);}
+      else{
+        const related=config[mode].topics.find(item=>text.includes(item));
+        state[mode].messages.push({type:'user',text},{type:'assistant',text:'已收到您的'+config[mode].name+'問題。此原型尚未串接正式服務，'+(related?'您可以先參考「'+related+'」的常見問題：':'您可以點選上方主題，體驗常見問題與回答流程。'),items:related?faqs[mode][related]:undefined,topic:related,source:'尚未查詢正式資料來源',time:new Date().toISOString()});
+        renderMessages();
+      }
+      question.focus();
+    }
+    document.getElementById('composer').addEventListener('submit',event=>{
+      event.preventDefault();const text=question.value.trim();if(!text){question.focus();return;}
+      document.getElementById('routing-notice').hidden=true;
+      state[mode].draft='';question.value='';
+      const target=detectMode(text);
+      if(target){routeQuestion(text,target);}
+      else{
+        state[mode].messages.push({type:'user',text},{type:'notice',text:'您想查詢社宅資料，還是了解系統的操作方式？請選擇本次問題的服務類型。',chooseMode:true,question:text});
+        renderMessages();question.focus();
+      }
+    });
+    switchMode('info');
+  </script>
+</body>
+</html>
